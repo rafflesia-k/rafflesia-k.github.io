@@ -1,0 +1,358 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>第七章 事务处理、并发和恢复 | rafflesia-k</title><meta name="author" content="大哒王花"><meta name="copyright" content="大哒王花"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="《数据库原理》课程笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第七章 事务处理、并发和恢复">
+<meta property="og:url" content="http://example.com/2024/06/28/257e255e.html">
+<meta property="og:site_name" content="rafflesia-k">
+<meta property="og:description" content="《数据库原理》课程笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/avatar2.jpg">
+<meta property="article:published_time" content="2024-06-28T10:47:31.479Z">
+<meta property="article:modified_time" content="2024-08-28T06:32:08.186Z">
+<meta property="article:author" content="大哒王花">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/avatar2.jpg"><link rel="shortcut icon" href="/img/9.png"><link rel="canonical" href="http://example.com/2024/06/28/257e255e.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '第七章 事务处理、并发和恢复',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-28 14:32:08'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar2.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="rafflesia-k"><span class="site-name">rafflesia-k</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">第七章 事务处理、并发和恢复</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-06-28T10:47:31.479Z" title="发表于 2024-06-28 18:47:31">2024-06-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-28T06:32:08.186Z" title="更新于 2024-08-28 14:32:08">2024-08-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8E%9F%E7%90%86/">数据库原理</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span></div></div></div><article class="post-content" id="article-container"><h1 id="第七章-事务处理-并发和恢复"><a class="markdownIt-Anchor" href="#第七章-事务处理-并发和恢复"></a> 第七章 事务处理、并发和恢复</h1>
+<p>主要内容：数据库事务的概念，事务的ACID特性，基于锁的并发协议，死锁处理，多版本机制，快照隔离</p>
+<p>1） 基本要求</p>
+<ol>
+<li>了解事务的基本概念</li>
+<li>熟悉事务的ACID特性</li>
+<li>了解并发控制和多版本机制的基本原理</li>
+</ol>
+<p>2） 重点、难点</p>
+<p><strong>重点：</strong> 事务的ACID特性</p>
+<p><strong>难点：</strong> 基于WAL的恢复机制</p>
+<p>主要内容：数据库事务隔离性要求的具体实现-并发控制</p>
+<p>1） 基本要求</p>
+<ol>
+<li>了解并发控制和多版本机制的基本原理</li>
+</ol>
+<p>2） 重点、难点</p>
+<p><strong>重点：</strong> 并发控制的机制</p>
+<p><strong>难点：</strong> 2阶段锁</p>
+<p>主要内容：数据库事务原子性和持久性的要求和具体实现-日志和恢复</p>
+<p>1） 基本要求</p>
+<ol>
+<li>了解并日志和恢复的基本原理，及对原子性、持久性的支撑</li>
+</ol>
+<p>2） 重点、难点</p>
+<p><strong>重点：</strong> WAL、redo、undo</p>
+<p><strong>难点：</strong> 基于日志的恢复</p>
+<h2 id="事务"><a class="markdownIt-Anchor" href="#事务"></a> 事务</h2>
+<h4 id="事务的定义"><a class="markdownIt-Anchor" href="#事务的定义"></a> 事务的定义：</h4>
+<ul>
+<li>访问并可能更新各种数据项的一个程序执行单元</li>
+<li>事务是多个数据库操作组合成的一个不可分割的、同时成功或失败的工作单元</li>
+<li><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240621125712324.png" alt="image-20240621125712324"></li>
+<li>显示： COMMIT/ROLLBACK<br>
+隐式： 由DBMS自动划分</li>
+<li>E.g.  账户A向账户B转账50元 （A=A-50, B=B+50）<br>
+用户A向12306订G01次车票一张 (A=A+1, G01=G01-1)   <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240621125910235.png" alt="image-20240621125910235" style="zoom:60%;"></li>
+<li>事务具有四个特性（ACID）：原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）和持久性（Durability）</li>
+</ul>
+<h4 id="事务的要求"><a class="markdownIt-Anchor" href="#事务的要求"></a> 事务的要求：</h4>
+<p>事务保持正确性的评判准则</p>
+<p>原子性（atomicity）：<font color="red">不可分割</font>，一个事务包含的所有操作“要么全都执行，要么全都不执行”</p>
+<p>一致性（consistency）：<font color="red">正确一致</font>，事务的执行不改变数据库实例的一致性 ,即事务执行前数据库满足一致性，执行后也满足一致性</p>
+<p>隔离性（isolation）：<font color="red">互不干扰</font>，事务之间相互隔离，即对并发执行的其他事务无感知 (多个事务在并发执行的过程中所得到的结果，和串行执行得到的结果是一致)</p>
+<p>持久性（durability）：<font color="red">永久保持</font>，一旦某个事务执行完成，其对数据的更改将持久化反应到数据库实例上</p>
+<h5 id="原子性atomicity"><a class="markdownIt-Anchor" href="#原子性atomicity"></a> 原子性（Atomicity）</h5>
+<p><font color="red">不可分割</font>，一个事务包含的所有操作“要么全都执行，要么全都不执行”</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240621130910342.png" alt="image-20240621130910342" style="zoom:50%;">
+<p>事务状态：</p>
+<ol>
+<li>活跃(active)： 事务开始执行时的初始状态</li>
+<li>部分提交(partially committed)： 最后一条语句被执行后，提交之前</li>
+<li>失效(failed) ： 发现该事务不能再继续正常执行了</li>
+<li>中止(aborted) ： 事务已经回滚，数据库实例已恢复到事务开始前的状态，中止之后可选择 重启事务 和 杀死事务  操作</li>
+<li>提交(committed) ： 事务成功完成之后</li>
+</ol>
+<p>原子性只允许事务最终处于 提交态(全都执行) 或 中止态(全都不执行)</p>
+<p>保障原子性的机制 ：</p>
+<ul>
+<li>日志
+<ul>
+<li>DBMS用日志记录所有的操作</li>
+<li>事务一旦中止，可以回溯日志以回滚操作</li>
+</ul>
+</li>
+<li>影子分页技术
+<ul>
+<li>对页面拷贝</li>
+<li>事务优先在拷贝页面上执行</li>
+<li>仅当执行提交（commit） 后，才持久化可见</li>
+</ul>
+</li>
+</ul>
+<h5 id="一致性consistency"><a class="markdownIt-Anchor" href="#一致性consistency"></a> 一致性（consistency）</h5>
+<p><font color="red">正确一致</font>，事务的执行不改变数据库实例的一致性，即事务执行前数据库满足一致性，执行后也满足一致性</p>
+<p>显式的完整性约束</p>
+<p>隐式的完整性约束：E.g. SUM(R.收入)-SUM(R.支出)=SUM(R.利润)</p>
+<p>事务执行前：数据库实例应满足一致性要求   E.g. 已出售票量+剩余票量=总票量</p>
+<p>事务执行中：允许暂时的不一致</p>
+<p>事务执行完（无论成功与否）：数据库实例应满足一致性要求  E.g. 已出售票量+剩余票量=总票量</p>
+<p>如果不一致，说明事务执行有问题</p>
+<p>保证事务一致性应是<font color="red">上层应用</font>的职责，即语句编写者</p>
+<h5 id="隔离性isolation"><a class="markdownIt-Anchor" href="#隔离性isolation"></a> 隔离性（isolation）</h5>
+<p><font color="red">互不干扰</font>，事务之间相互隔离，即对并发执行的其他事务无感知 (多个事务在并发执行的过程中所得到的结果，和串行执行得到的结果是一致)</p>
+<p>事务的穿插执行可能破坏一致性 / 并发执行产生冲突</p>
+<p><font color="red">并发控制</font>是实现事务隔离性的手段</p>
+<p>调度：多个并发事务的操作穿插执行的顺序</p>
+<p>串行化调度：串行执行 如果调度S没有对其中各事务的操作进行穿插执行（即调度S严格将事务依次执行），那么称调度S为串行的</p>
+<p>可串行化调度：如果一个调度S等价于另一个串行化的调度S’，那么这个调度S称为可串行化的</p>
+<p>调度等价：</p>
+<ul>
+<li>冲突可串行化
+<ul>
+<li>冲突：分属于两个事务，访问同一数据对象，至少一个为写
+<ul>
+<li><strong>读-写冲突</strong>（不可重复读）：事务1读取数据后，事务2执行更新（增删改）操作，使事务1无法再现前一次读取结果</li>
+<li><strong>写-读冲突</strong>（读“赃”数据）：事务1修改某一数据，并将其写回磁盘，事务2读取同一数据后，事务1由于某种原因被撤消。这时事务1已修改过的数据恢复原值，事务2读到的数据就与数据库中的数据不一致，是不正确的数据，又称为“脏”数据</li>
+<li><strong>写-写冲突</strong> （丢失修改）：事务1与事务2从数据库中读入同一数据并修改，事务2的提交结果破坏了事务1提交的结果，导致事务1的修改被丢失</li>
+</ul>
+</li>
+<li>冲突等价：交换无冲突的操作的次序</li>
+<li>冲突可串行化：当调度S 与另一串行调度是冲突等价的，则称调度S是冲突可串行化的</li>
+</ul>
+</li>
+<li>视图可串行化
+<ul>
+<li><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240622200731576.png" alt="image-20240622200731576"></li>
+<li><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240622200747568.png" alt="image-20240622200747568"></li>
+</ul>
+</li>
+<li><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240622200800488.png" alt="image-20240622200800488"></li>
+</ul>
+<p><strong>利用优先图进行冲突可串行化测试</strong></p>
+<p>无环 链式  &lt;=&gt; 冲突可串行化</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240622201122622.png" alt="image-20240622201122622">  <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240622201148773.png" alt="image-20240622201148773"></p>
+<p><strong>隔离级别</strong>（由高到低，一步步放宽）</p>
+<p>有些应用场景可允许不可串行调度的执行</p>
+<ul>
+<li>可串行化
+<ul>
+<li>可能出现的问题：无</li>
+</ul>
+</li>
+<li>可重复读：只允许读取已提交的数据（不会出现脏读），不允许一个事务两次读取之间其他事务对其更新（不会出现不可重复读 因此 可重复读）
+<ul>
+<li>可能出现的问题：丢失修改</li>
+</ul>
+</li>
+<li>已提交读：只允许读取已提交的数据（不会出现脏读），但并不要求可重复读（读间可更新）（会出现不可重复读）
+<ul>
+<li>可能出现的问题：丢失修改 + 不可重复读</li>
+</ul>
+</li>
+<li>未提交读：允许读取未提交数据
+<ul>
+<li>可能出现的问题：丢失修改 + 不可重复读 + 脏读</li>
+</ul>
+</li>
+</ul>
+<h5 id="持久性durability"><a class="markdownIt-Anchor" href="#持久性durability"></a> 持久性（durability）</h5>
+<p><font color="red">永久保持</font>，一旦某个事务执行完成，其对数据的更改将持久化反应到数据库实例上</p>
+<p>保障持久性的机制</p>
+<ul>
+<li>
+<p>日志</p>
+</li>
+<li>
+<p>影子分页技术</p>
+</li>
+</ul>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240622203558525.png" alt="image-20240622203558525" style="zoom:150%;">
+<h2 id="两阶段锁协议2pl"><a class="markdownIt-Anchor" href="#两阶段锁协议2pl"></a> 两阶段锁协议（2PL）</h2>
+<p>互斥锁（X）：既可读又可写</p>
+<p>共享锁（S）：只可读不可写</p>
+<p>每个事务根据自己的操作类型申请数据项上对应的锁</p>
+<p>锁管理器：管理事务对于锁的申请和授予</p>
+<p>事务仅当被授予数据项的对应锁，才可访问该数据项</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240624004231564.png" alt="image-20240624004231564"></p>
+<p>朴素的加锁：不能确保串行化</p>
+<p>延迟解锁：死锁、饿死</p>
+<p>两阶段封锁协议（2PL）：</p>
+<p>2-PL是冲突可串行化的充分非必要条件， （一个调度）所有事务均满足2-PL协议=&gt;冲突可串行化 ，存在一些冲突可串行化的调度并不能通过2-PL协议获得</p>
+<p>2-PL不能保证没有死锁</p>
+<p><strong>2-PL协议（允许锁转换）：</strong></p>
+<ul>
+<li>阶段1： 增长阶段<br>
+事务获取锁，但不能释放锁<br>
+事务可从S锁升级至X锁</li>
+<li>阶段2： 缩减阶段  （要等锁增长完才能进入阶段2）<br>
+事务可以释放锁，但不能获得新锁<br>
+事务可从X锁降级至S锁</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240624010713199.png" alt="image-20240624010713199"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/image-20240624011123759.png" alt="image-20240624011123759"></p>
+<p>给数据表加锁是说锁定整张表</p>
+<h2 id="日志和恢复"><a class="markdownIt-Anchor" href="#日志和恢复"></a> 日志和恢复</h2>
+<h3 id="崩溃恢复策略设计"><a class="markdownIt-Anchor" href="#崩溃恢复策略设计"></a> 崩溃恢复策略设计</h3>
+<p><strong>持久性：</strong> 如果在崩溃时刻一个已提交的事务对数据库的修改没有从缓冲区写回磁盘，那么事务的持久性受到了影响，需要重做这些事务</p>
+<ul>
+<li>Force（强制）：事务每次修改都强制写入磁盘，保证持久性（但是消耗系统资源）</li>
+<li><strong>No-Force（非强制）：</strong> 事务每次修改不强制写入磁盘，但是会影响持久性。因此在事务提交之前，将该事务所有对数据库的影响以日志的形式写回磁盘 崩溃会重做日志</li>
+</ul>
+<p><strong>原子性：</strong> 如果在崩溃时刻一个未结束的事务对数据库的修改有一部分已经从缓冲区写回磁盘，那么事务的原子性受到了影响，需要回滚这些事务</p>
+<ul>
+<li>NO-STEAL（非窃取）：只要事务还没提交，它的一切修改都不写入磁盘，保证原子性（但是占用大量缓冲区空间）</li>
+<li><strong>STEAL（窃取）：</strong> 未提交事务的修改也可以写入磁盘，影响原子性。因此在事务将修改写入磁盘之前，先向磁盘写入可以撤销修改的回滚日志</li>
+</ul>
+<p>预写日志（WAL）：每次更改数据之前，先在日志中添加对应的记录  ；即日志在数据页之前刷新</p>
+<p>当数据 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span> 修改数据项 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span></span></span></span> （<font color="red">Write(X)</font>）时产生 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&lt;</mo><mi>T</mi><mo separator="true">,</mo><mi>X</mi><mo separator="true">,</mo><msub><mi>v</mi><mrow><mi>n</mi><mi>e</mi><mi>w</mi></mrow></msub><mo separator="true">,</mo><msub><mi>v</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mo>&gt;</mo></mrow><annotation encoding="application/x-tex">&lt; T, X, v_{new} , v_{old}&gt;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02691em;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span></span></span></span></p>
+<p><strong>重做日志：</strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&lt;</mo><mi>T</mi><mo separator="true">,</mo><mi>X</mi><mo separator="true">,</mo><msub><mi>v</mi><mrow><mi>n</mi><mi>e</mi><mi>w</mi></mrow></msub><mo>&gt;</mo></mrow><annotation encoding="application/x-tex">&lt; T, X, v_{new} &gt;
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02691em;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span></span></span></span>  记录事务对数据库的所有影响，保存<font color="red">更新以后</font>的值，恢复子系统<font color="red">从前往后</font>扫描重做日志</p>
+<p><strong>回滚日志：</strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&lt;</mo><mi>T</mi><mo separator="true">,</mo><mi>X</mi><mo separator="true">,</mo><msub><mi>v</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mo>&gt;</mo></mrow><annotation encoding="application/x-tex">&lt; T, X, v_{old} &gt;
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span></span></span></span>  记录撤销事务所需的内容，保存<font color="red">修改以前</font>的值，恢复子系统<font color="red">从后往前</font>扫描重做日志</p>
+<p><strong>没有提交和中止的事务要undo回滚 （找没有commit的）</strong></p>
+<p><strong>有提交或中止的事务要redo重做（找已经commit的）</strong></p>
+<p><strong>检查点：</strong>    <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&lt;</mo><mi>c</mi><mi>h</mi><mi>e</mi><mi>c</mi><mi>k</mi><mi>p</mi><mi>o</mi><mi>i</mi><mi>n</mi><mi>t</mi><mtext> </mtext><mi>T</mi><mo>&gt;</mo></mrow><annotation encoding="application/x-tex">&lt;checkpoint\ T&gt;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">c</span><span class="mord mathnormal">h</span><span class="mord mathnormal">e</span><span class="mord mathnormal">c</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathnormal">p</span><span class="mord mathnormal">o</span><span class="mord mathnormal">i</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mspace"> </span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span></span></span></span></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/257e255e/13a642c2f7b8cf3ae593e6a4297bece9_720.jpg" alt="img"></p>
+<p><strong>《数据库原理》课程笔记：</strong></p>
+<ol><li><a href="/2024/06/28/9bd3300d.html" title="第一章 数据库系统概述和关系模型">第一章 数据库系统概述和关系模型</a></li><li><a href="/2024/06/28/257e255e.html" title="第七章 事务处理、并发和恢复">第七章 事务处理、并发和恢复</a></li><li><a href="/2024/06/28/885ffcc2.html" title="第二章 关系模式规范化">第二章 关系模式规范化</a></li><li><a href="/2024/06/28/d9c30aa5.html" title="第五章 存储和索引技术">第五章 存储和索引技术</a></li><li><a href="/2024/06/28/49d65152.html" title="第六章 查询处理和优化">第六章 查询处理和优化</a></li></ol></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">大哒王花</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/06/28/257e255e.html">http://example.com/2024/06/28/257e255e.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">rafflesia-k</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></div><div class="post_share"><div class="social-share" data-image="/img/avatar2.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/06/28/9bd3300d.html" title="第一章 数据库系统概述和关系模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">第一章 数据库系统概述和关系模型</div></div></a></div><div class="next-post pull-right"><a href="/2024/06/28/885ffcc2.html" title="第二章 关系模式规范化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">第二章 关系模式规范化</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/06/28/9bd3300d.html" title="第一章 数据库系统概述和关系模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第一章 数据库系统概述和关系模型</div></div></a></div><div><a href="/2024/06/28/885ffcc2.html" title="第二章 关系模式规范化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第二章 关系模式规范化</div></div></a></div><div><a href="/2024/06/28/d9c30aa5.html" title="第五章 存储和索引技术"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第五章 存储和索引技术</div></div></a></div><div><a href="/2024/06/28/49d65152.html" title="第六章 查询处理和优化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第六章 查询处理和优化</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E7%AB%A0-%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86-%E5%B9%B6%E5%8F%91%E5%92%8C%E6%81%A2%E5%A4%8D"><span class="toc-text"> 第七章 事务处理、并发和恢复</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1"><span class="toc-text"> 事务</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-text"> 事务的定义：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E8%A6%81%E6%B1%82"><span class="toc-text"> 事务的要求：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8E%9F%E5%AD%90%E6%80%A7atomicity"><span class="toc-text"> 原子性（Atomicity）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%80%E8%87%B4%E6%80%A7consistency"><span class="toc-text"> 一致性（consistency）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9A%94%E7%A6%BB%E6%80%A7isolation"><span class="toc-text"> 隔离性（isolation）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E6%80%A7durability"><span class="toc-text"> 持久性（durability）</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A4%E9%98%B6%E6%AE%B5%E9%94%81%E5%8D%8F%E8%AE%AE2pl"><span class="toc-text"> 两阶段锁协议（2PL）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E5%92%8C%E6%81%A2%E5%A4%8D"><span class="toc-text"> 日志和恢复</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B4%A9%E6%BA%83%E6%81%A2%E5%A4%8D%E7%AD%96%E7%95%A5%E8%AE%BE%E8%AE%A1"><span class="toc-text"> 崩溃恢复策略设计</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background: transparent"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By 大哒王花</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.8/dist/lazyload.iife.min.js"></script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>

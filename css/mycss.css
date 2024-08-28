@@ -1,0 +1,135 @@
+:root {
+  --font-color: #000000;
+}
+
+
+/* 首页文章卡片 */
+#recent-posts > .recent-post-item{
+    background:rgba(255, 255, 255, 0.84);
+}
+/* 首页侧栏卡片 */
+.card-widget{
+  background:rgba(255, 255, 255, 0.84)!important;
+}
+/* 公告栏颜色 */
+#aside-content .card-announcement .item-headline i {
+  color: #4C4948;
+}
+/* 文章页面正文背景 */
+div#post{
+  background: rgba(255, 255, 255, 0.84);
+}
+/* 分页页面 */
+div#page{
+  background: rgba(255, 255, 255, 0.84);
+}
+/* 归档页面 */
+div#archive{
+  background: rgba(255, 255, 255, 0.84);
+}
+/* 标签页面 */
+div#tag{
+  background: rgba(255, 255, 255, 0.84);
+}
+/* 分类页面 */
+div#category{
+  background: rgba(255, 255, 255, 0.84);
+}
+
+/* 夜间模式 */
+[data-theme='dark'] {
+    /* 首页文章卡片 */
+    #recent-posts>.recent-post-item {
+        background: rgba(0, 0, 0, 0.761);
+    }
+
+    /* 首页侧栏卡片 */
+    .card-widget {
+        background: rgba(0, 0, 0, 0.761) !important;
+    }
+
+    /* 文章页面正文背景 */
+    div#post {
+        background: rgba(0, 0, 0, 0.761);
+    }
+
+    /* 分页页面 */
+    div#page {
+        background: rgba(0, 0, 0, 0.761);
+    }
+
+    /* 归档页面 */
+    div#archive {
+        background: rgba(0, 0, 0, 0.761);
+    }
+
+    /* 标签页面 */
+    div#tag {
+        background: rgba(0, 0, 0, 0.761);
+    }
+
+    /* 分类页面 */
+    div#category {
+        background: rgba(0, 0, 0, 0.761);
+    }
+}
+
+#pagination.pagination-post {
+  background: transparent !important;
+}
+
+/* 移除上下篇按钮的背景色，保留文字 */
+#pagination .prev-post .cover,
+#pagination .next-post .cover {
+  background: none !important;
+  /* 移除背景色 */
+}
+
+/* 移除整个按钮区域的背景色和边框，保持文本显示 */
+#pagination .prev-post a,
+#pagination .next-post a {
+  background: none;
+  /* 移除背景色 */
+  color: #4c4948;
+  /* 保持继承的文本颜色 */
+}
+
+/* 仅在鼠标悬停时显示效果，例如下划线或改变文字颜色 */
+#pagination .pagination-info .prev_info:hover,
+#pagination .pagination-info .next_info:hover {
+  text-decoration: underline;
+  /* 鼠标悬停时添加下划线 */
+  color: #0073e6;
+  /* 鼠标悬停时改变文字颜色（可选） */
+}
+
+/* 调整分页信息文本样式 */
+#pagination .pagination-info .label,
+#pagination .pagination-info .prev_info,
+#pagination .pagination-info .next_info {
+  color: #4c4948 ;
+  /* 使用继承的文本颜色 */
+}
+
+[data-theme='dark']{
+  #pagination .pagination-info .label,
+  #pagination .pagination-info .prev_info,
+  #pagination .pagination-info .next_info {
+    color: rgba(255, 255, 255, 0.7);;
+    /* 使用继承的文本颜色 */
+  }
+
+}
+/* 带颜色的粗体和斜体 */
+strong,
+em {
+  color: #f76d47;
+}
+/* 高亮颜色 */
+mark {
+  background-color: #aaff9b
+  /* Replace with your desired color */
+}
+sub {
+  vertical-align: sub;
+}

@@ -1,0 +1,583 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>第六章 查询处理和优化 | rafflesia-k</title><meta name="author" content="大哒王花"><meta name="copyright" content="大哒王花"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="《数据库原理》课程笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第六章 查询处理和优化">
+<meta property="og:url" content="http://example.com/2024/06/28/49d65152.html">
+<meta property="og:site_name" content="rafflesia-k">
+<meta property="og:description" content="《数据库原理》课程笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/avatar2.jpg">
+<meta property="article:published_time" content="2024-06-28T10:47:31.481Z">
+<meta property="article:modified_time" content="2024-08-28T07:47:05.093Z">
+<meta property="article:author" content="大哒王花">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/avatar2.jpg"><link rel="shortcut icon" href="/img/9.png"><link rel="canonical" href="http://example.com/2024/06/28/49d65152.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '第六章 查询处理和优化',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-28 15:47:05'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar2.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="rafflesia-k"><span class="site-name">rafflesia-k</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">第六章 查询处理和优化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-06-28T10:47:31.481Z" title="发表于 2024-06-28 18:47:31">2024-06-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-28T07:47:05.093Z" title="更新于 2024-08-28 15:47:05">2024-08-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8E%9F%E7%90%86/">数据库原理</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>16分钟</span></span></div></div></div><article class="post-content" id="article-container"><h1 id="第六章-查询处理和优化"><a class="markdownIt-Anchor" href="#第六章-查询处理和优化"></a> 第六章 查询处理和优化</h1>
+<p>主要内容：理解常用数据库物理层执行模型；物理层执行过程的数据访问方法；核心逻辑算子的物理执行算法。</p>
+<ol>
+<li>基本要求</li>
+</ol>
+<p>a）理解常用数据库物理层执行模型</p>
+<p>b）熟悉数据库物理层对各逻辑算子的具体执行算法</p>
+<p>c）掌握同种逻辑算子多种物理实现策略的异同和适合的场景</p>
+<ol start="2">
+<li>重点、难点</li>
+</ol>
+<p><strong>重点：</strong> 数据库物理层对各逻辑算子的具体执行算法</p>
+<p><strong>难点：</strong> 掌握同种逻辑算子多种物理实现策略的异同和适合的场景</p>
+<p>主要内容：数据库SQL引擎中的编译过程，统计信息获取，查询优化（包括基于代价的优化和基于规则的优化）。</p>
+<ol>
+<li>基本要求</li>
+</ol>
+<p>a）了解SQL编译过程中的抽象语法树生成</p>
+<p>b）熟悉查询优化的基本步骤</p>
+<p>c）掌握基于规则的优化和基于代价的优化的区别和联系</p>
+<p>d）掌握基于代价的优化和数据库统计信息间的关系</p>
+<p>e）熟悉查询优化过程中连接顺序剪枝和过滤算法</p>
+<ol start="2">
+<li>重点、难点</li>
+</ol>
+<p><strong>重点：</strong> 查询优化的基本步骤</p>
+<p><strong>难点：</strong> 基于代价的优化及连接顺序剪枝算法。</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620163927813.png" alt="image-20240620163927813" style="zoom:50%;">
+<p>查询优化，一般从<font color="red"><mark>逻辑</mark></font>和<font color="red"><mark>物理</mark></font>两个层面进行。逻辑层面优化的目标是<font color="red">找出与原始查询等价但更加高效的关系代数表达式</font>，主要是通过调整关系代数运算顺序来使每步运算要处理的数据行数最少。例如数据库一般会将选择运算下推，以尽早缩减参与运算的数据行数。逻辑优化后需要进行物理优化，<font color="red">主要是利用数据库的数据规模(如数据块大小和统计信息等)来估计计划执行的代价，并从众多候选计划中 出代价最小的计划</font>。物理优化需要选择每个算子的物理实现算法，例如在连接操作中选择嵌套循环连接或哈希连接，并确定多表连接时的连接顺序。查询优化使数据库尽量选择较为高效的执行方案，从而提高数据库执行查询的效率。与逻辑优化不同的是，物理优化过程需要考虑关系实例的统计信息特征，例如一列非重复值的数量，以准确计算不同物理操作的执行代价。</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/c3fd84168ac6372b1dd9b58d071bae23_720-17189046739911.jpg" alt="img" style="zoom:67%;">
+<h1 id="一-查询解析"><a class="markdownIt-Anchor" href="#一-查询解析"></a> 一、查询解析</h1>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616170712558.png" alt="image-20240616170712558"></p>
+<h4 id="词法分析"><a class="markdownIt-Anchor" href="#词法分析"></a> 词法分析</h4>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616161801986.png" alt="image-20240616161801986" style="zoom:67%;">
+<p>将输入的SQL语句拆解为单词（token）序列，并对不同类别的单词进行分类标记，形成字符标记流。</p>
+<p>​	正则表达式：➢ 标识符ID [a-z][a-z0-9]+</p>
+<p>​							➢关键词 Keyword select | from | where</p>
+<p>​							➢分隔符 SEP , | ;</p>
+<p>​							➢运算符 OP = | + | &lt;</p>
+<p>​							➢ INT [0-9]+</p>
+<p>​	有限状态自动机</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/94b29d9db777175fbb2fa245482122f5_720.jpg" alt="img" style="zoom:40%;">
+<h4 id="语法分析"><a class="markdownIt-Anchor" href="#语法分析"></a> 语法分析</h4>
+<p>移进：将字符标记放入栈中</p>
+<p>归约：用非终结符代替栈的顶部元素  出栈 并在AST中新建对应的语法类节点</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616163606648.png" alt="image-20240616163606648"></p>
+<h4 id="语义分析"><a class="markdownIt-Anchor" href="#语义分析"></a> 语义分析</h4>
+<p>检查关系（表名）、属性（列名）、数据类型.......</p>
+<p>授权检查</p>
+<p>将语法分析树转换为查询树</p>
+<h2 id="二-逻辑重写"><a class="markdownIt-Anchor" href="#二-逻辑重写"></a> 二、逻辑重写</h2>
+<p>声明式的SQL-&gt;查询执行的逻辑顺序</p>
+<p>基于规则的优化（Rule-based Optimization, RBO）</p>
+<p>➢ 查询的逻辑重写，以尽可能减少不合理的开销</p>
+<p>➢ 基于（<font color="red">关系代数的等价变换</font>） 规则</p>
+<p>➢ 调整操作顺序</p>
+<p>➢ 生成：由逻辑运算符组成的逻辑计划（树）</p>
+<p>➢ 逻辑运算符：关系代数的算子（π ， σ ， ⋈， …）</p>
+<p>➢ 与关系实例无关</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616172747121.png" alt="image-20240616172747121" style="zoom:33%;"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616172821178.png" alt="image-20240616172821178" style="zoom:50%;"></p>
+<p><strong>RBO通用规则：</strong></p>
+<ol>
+<li>
+<p>复合谓词拆分</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616173118490.png" alt="image-20240616173118490" style="zoom:33%;"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616172947051.png" alt="image-20240616172806514" style="zoom:50%;"></p>
+</li>
+<li>
+<p>谓词下推</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616173221792.png" alt="image-20240616173221792" style="zoom:49%;"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616173244626.png" alt="image-20240616173244626" style="zoom:59%;"></p>
+</li>
+<li>
+<p>笛卡尔积改为连接</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616173444040.png" alt="image-20240616173444040" style="zoom:50%;"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240616173453691.png" alt="image-20240616173453691" style="zoom:50%;"></p>
+</li>
+<li>
+<p>投影下推  ：先过滤掉不必要的列，只携带必需的列进行计算和传递</p>
+</li>
+<li>
+<p>嵌套查询</p>
+<p>重写(为连接查询)【 ref., 视图消解】</p>
+<p>实体化临时表【 ref., 实体化视图】</p>
+</li>
+<li>
+<p>表达式重写</p>
+</li>
+</ol>
+<h2 id="三-物理算子"><a class="markdownIt-Anchor" href="#三-物理算子"></a> 三、物理算子</h2>
+<p>算子：选择、连接、排序、聚集等</p>
+<p>基于代价的优化（Cost-based Optimization, CBO）</p>
+<p>➢ 查询的<font color="red">物理优化</font></p>
+<p>➢ 使用代价模型，对操作进行代价估计</p>
+<p>➢ 衡量所有可能的执行方式，选择执行代价最小的</p>
+<p>➢ 生成：由物理操作符组成的物理执行计划（树）</p>
+<p>➢ <mark>物理操作符</mark>：关系代数算子的具体物理实现 <font color="red">（1 -&gt; n映射）</font></p>
+<p>➢ 与关系实例相关</p>
+<p>➢ 需要使用实例的统计信息</p>
+<p>设<font color="red">B(R)</font>为关系R的块（页）数， <font color="red">T(R)</font>为关系R中的元组数</p>
+<p>例如B(R)=2000， T(R)=100000， (80B/tuple)</p>
+<h4 id="选择σ"><a class="markdownIt-Anchor" href="#选择σ"></a> 选择σ</h4>
+<h5 id="全表扫描-table-scan"><a class="markdownIt-Anchor" href="#全表扫描-table-scan"></a> 全表扫描 Table Scan</h5>
+<p>顺序扫描整个Table，依次检查每个元组以衡量是否满足过滤谓词</p>
+<p>➢ 等值谓词 “ = ”</p>
+<ul>
+<li>对应属性是码/唯一约束（只有一个）时，命中即可结束，<font color="red">平均B(R)/2</font></li>
+<li>代价是<font color="red">B(R)</font></li>
+<li>最多<font color="red">B(R)</font>次I/O操作</li>
+</ul>
+<p>➢比较谓词 “ &lt;, &gt;, ≤, ≥ ”</p>
+<ul>
+<li><font color="red">B(R)</font>次I/O操作</li>
+</ul>
+<h5 id="索引扫描-index-scan"><a class="markdownIt-Anchor" href="#索引扫描-index-scan"></a> 索引扫描 Index Scan</h5>
+<p>借助索引的扫描（索引-&gt;Table），设树深为h = $\left\lceil \log_{\left\lceil n/2 \right\rceil} (T(R)) \right\rceil $(每访问一个内部节点都会进行一次I/O操作)</p>
+<p>过滤谓词必须是某个索引的搜索码</p>
+<p>➢ 等值谓词 “ = ”</p>
+<ol>
+<li>
+<p>聚簇索引（元组按搜索码顺序存储在连续的块中）</p>
+<p>搜索码唯一 ，命中一个即结束  <font color="red">h+1</font>次I/O<br>
+（还有的一次是读取目标元组所在的磁盘块）</p>
+<p>搜索码不唯一 ，会命中多条记录，多条记录存储于连续块 <font color="red">h+b</font>次I/O</p>
+<p>​	根据 𝑏 / 𝐵(𝑅) = 𝑇(𝜎<sub>p</sub>(𝑅)) / 𝑇(𝑅)<br>
+​	该记录分布到的块数𝑏 = 𝐵(𝑅) × 𝑇(𝜎<sub>p</sub>(𝑅)) / 𝑇(𝑅)</p>
+</li>
+<li>
+<p>非聚簇索引</p>
+</li>
+</ol>
+<p>搜索码唯一 ，命中一个即结束  <font color="red">h+1</font>次I/O</p>
+<p>搜索码不唯一 ，定位到的记录分布于相对随机的 𝑏′ 个磁盘块， <font color="red">h+ b′ </font>次I/O<br>
+𝑏′ = 𝐵 (𝜎<sub>𝑝</sub>(𝑅))  = min{ 𝑇(𝜎<sub>p</sub>(𝑅)) ,  B(R) } 这里是代价，故作最坏打算</p>
+<p>➢ 比较谓词 “ ≥v ”</p>
+<ol>
+<li>聚簇索引<br>
+先定位到v对应的叶子结点，然后从其指向的数据块顺序扫描所有剩余块(b块)<br>
+h+b = <font color="red">h + B(R) * T(σ<sub>A≥v</sub>(R)) / T(R)</font><br>
+<mark>选择率 =  T(σ<sub>A≥v</sub>(R)) / T(R)</mark></li>
+<li>非聚簇索引<br>
+先定位到v对应的叶子(h次)，然后向后顺序扫描剩余（γ个）叶子提取所有指向记录的指针，根据获取的指针读取对应数据块（随机I/O T(σ<sub>A≥v</sub>(R))）<br>
+<font color="red">h + γ + T(σ<sub>A≥v</sub>(R))</font><br>
+γ = T(σ<sub>A≥v</sub>(R)) / n<br>
+n是B+树因子，每个叶子节点包含 n 个指针。满足条件的指针数为 T(σ<sub>A≥v</sub>(R))</li>
+</ol>
+<p>➢ 比较谓词 “ &lt;v ”</p>
+<ol>
+<li>聚簇索引<br>
+直接顺序扫描数据块，直到v （无需定位到v对应的叶子，数据块中存储的数据行按照聚簇索引的顺序排列，不使用索引 ）<br>
+<font color="red">B(R) * T(σ<sub>A&lt;v</sub>(R)) / T(R)</font></li>
+<li>非聚簇索引<br>
+直接顺序扫描索引的叶子提取所有指向记录的指针，直到包含v的叶子（γ个），根据获取的指针读取对应数据块（随机I/O T(σ<sub>A≥v</sub>(R))）<br>
+<font color="red">γ + T(σ<sub>A&lt;v</sub>(R))</font></li>
+</ol>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240619222223120.png" alt="image-20240619222223120" style="zoom: 67%;">
+<p>索引扫描与仅索引扫描的区别：索引扫描需要额外访问表以取得非索引列，而仅索引扫描则完全依赖索引，不访问表数据。</p>
+<ol>
+<li>索引扫描（Index Scan）:
+<ul>
+<li>索引扫描需要访问索引来确定哪些行符合查询条件。</li>
+<li>从索引获取到行的指针后，它需要回到数据表中以取得完整的行数据。</li>
+<li>适用于索引覆盖一部分查询条件的情况，需要访问表数据以获取不在索引中的列。</li>
+</ul>
+</li>
+<li>仅索引扫描（Index-Only Scan）:
+<ul>
+<li>当查询所需的数据完全被索引覆盖时，可以使用仅索引扫描，这时不必访问数据表。</li>
+<li>这种扫描提供更高的性能，因为它避免了对表的访问，仅仅通过索引即可获取所有需要的数据列。</li>
+<li>当查询的列已经全部在索引中时用此方法，减少了对表的I/O访问。</li>
+</ul>
+</li>
+</ol>
+<p><strong>全表扫描VS索引扫描</strong></p>
+<ul>
+<li><strong>全表扫描</strong>：适合小表和需要处理大部分或全部数据的查询。</li>
+<li><strong>聚簇索引扫描</strong>：适合精确匹配和顺序访问大量记录的查询。</li>
+<li><strong>非聚簇索引扫描</strong>：适合精确查询和部分范围查询，但由于数据可能分布在不同块中，随机I/O开销较大。</li>
+</ul>
+<p>等值谓词且搜索码唯一，<strong>索引扫描</strong>好</p>
+<p>等值谓词且搜索码不唯一 and 比较谓词，<strong>聚簇索引扫描</strong>好；全表扫描和非聚簇索引扫描谁好要看选择率，选择率高可能全表扫描相对好，选择率低可能非聚簇索引扫描相对好，</p>
+<h5 id="image-20240619224430882"><a class="markdownIt-Anchor" href="#image-20240619224430882"></a> <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240619224430882.png" alt="image-20240619224430882"></h5>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240619224538270.png" alt="image-20240619224538270"></p>
+<h4 id="排序τ"><a class="markdownIt-Anchor" href="#排序τ"></a> 排序τ</h4>
+<h5 id="外归并排序"><a class="markdownIt-Anchor" href="#外归并排序"></a> 外归并排序</h5>
+<p>基于外存，适用于排序无法完全放入内存的大型数据集。</p>
+<p>它通过分阶段的处理，将数据分块排序并逐步归并，最终得到有序的数据</p>
+<p>归并段（ run）</p>
+<ul>
+<li>一个键/值（ Key/Value ）列表</li>
+<li>Key：用于排序的属性列</li>
+<li>Value：元组ID/元组内容</li>
+</ul>
+<p>以2路为例</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620004158070.png" alt="image-20240620004158070" style="zoom:50%;">（a是内容，19是行号）</p>
+<p>➢初始分块排序：将大数据集分成适合内存的M块，依次读入M个块(完整的用于排序的K/V列表共占M页)，在内存中进行排序，将排序后的数据块写回到磁盘，形成有序的子文件（runs）</p>
+<p>➢归并排序：从磁盘读取两个有序的子文件合并，生成更大的有序子文件，写回磁盘。上述过程使用缓冲池中的3个帧（2个用于输入、一个输出）<br>
+重复合并过程，直到所有子文件合并成一个最终的有序输出文件。</p>
+<p>I/O数量：</p>
+<ul>
+<li>趟数（树高）：1 + ⌈log<sub>2</sub>M⌉</li>
+<li>每趟： 2M</li>
+<li>合计： <font color="red">2B(R) × (1 + ⌈log<sub>2</sub>B(R)⌉)</font></li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620004629306.png" alt="image-20240620004629306" style="zoom:60%;">(磁盘每次只能一页一页读)</p>
+<h4 id="连接"><a class="markdownIt-Anchor" href="#连接"></a> 连接⋈</h4>
+<p>SELECT R.StuID, S.Cno, S.grade FROM Student R, SC S WHERE age = 19 AND R.StuID=S.Sno;</p>
+<h5 id="嵌套循环-nested-loop-join"><a class="markdownIt-Anchor" href="#嵌套循环-nested-loop-join"></a> 嵌套循环 Nested Loop Join</h5>
+<p>➢扫描外表（左表）</p>
+<p>➢ 对于外表的每个符合条件的记录，根据连接条件，扫描内表（右表）来执行连接。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each tuple i in R:</span><br><span class="line">	<span class="keyword">for</span> each tuple j in S:</span><br><span class="line">		<span class="keyword">if</span> iθj, 拼接i和j并输出到Join结果</span><br></pre></td></tr></table></figure>
+<p>左表的每一行都想扫一遍右表</p>
+<p>I/O数量：</p>
+<ul>
+<li>外层循环： B(R)</li>
+<li>内层循环： T(R)*B(S)   （左表的每一行都想扫一遍右表）</li>
+<li>合计： <font color="red">B(R)+T(R)*B(S)  </font></li>
+</ul>
+<p>根据不对称产生思考，能否R与S互换，即左右表互换。<mark>结论：小表做外表(左表)</mark> 这样扫一整遍右表的次数少了</p>
+<p><strong>基于块访问方式的改进</strong> <strong>Block</strong> <strong>Nested</strong> <strong>Loop</strong> <strong>Join</strong></p>
+<p>j借助缓冲池，将外表的块读入内存，然后对每个块中的每个元组，与内表的所有元组进行比较。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each 块r in R:</span><br><span class="line">	<span class="keyword">for</span> each 块s in S:</span><br><span class="line">		<span class="keyword">for</span> each tuple i in R:</span><br><span class="line">			<span class="keyword">for</span> each tuple j in S:</span><br><span class="line">				<span class="keyword">if</span> iθj, 拼接i和j并输出到Join结果</span><br></pre></td></tr></table></figure>
+<p>尽可能把左表载入缓冲池</p>
+<p>分别保留1帧用于缓冲内表和结果，故可用于缓冲左表的共有(#Buffer - 2)帧</p>
+<p>结果存满一帧（页）即可落盘</p>
+<p>缓冲内表的那一帧主动拼接当时缓冲池所含所有的外表页面</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620113405400.png" alt="image-20240620113405400"></p>
+<p>I/O数量：</p>
+<ul>
+<li>外层循环： B(R)</li>
+<li>内层循环： ⌈ B(R) / (#Buffer-2) ⌉ * B(S)</li>
+<li>合计： <font color="red">B(R) +  ⌈ B(R) / (#Buffer-2) ⌉ * B(S)  </font></li>
+<li>如果#Buffer - 2 &gt;= B(R) ，即外表能一次全部放入缓冲池，<font color="red"> B(R) + B(S)  </font></li>
+</ul>
+<h5 id="排序合并-sort-merge-join"><a class="markdownIt-Anchor" href="#排序合并-sort-merge-join"></a> 排序合并 Sort-Merge Join</h5>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620131849955.png" alt="image-20240620131849955" style="zoom:50%;">
+<p>➢排序：R,S分别按照连接码排序<br>
+如果输入关系尚未排序，对两个输入关系分别按连接属性进行排序<br>
+可以使用外部排序算法，如外归并排序（External Merge Sort），来处理不能完全放入内存的大型数据集。</p>
+<p>➢合并：两表分别维护1个游标按顺序检查匹配<br>
+分别指向两个已排序关系的第一个元组,比较当前元组对的连接属性值。<br>
+如果两者匹配，将匹配的元组对加入结果集中，并移动两个游标到下一个元组。<br>
+如果不匹配，移动具有较小连接属性值的指针到下一个元组，继续比较。<br>
+直到至少一个关系的所有元组都被处理完。</p>
+<p>I/O数量：</p>
+<ul>
+<li>排序： Sort(B(R)) +  Sort(B(S))</li>
+<li>合并：B(R) + B(S)</li>
+<li>合计： <font color="red">2B(R) × (1 + ⌈log<sub>2</sub>B(R)⌉)  + 2B(S) × (1 + ⌈log<sub>2</sub>B(S)⌉) + B(R) + B(S)  </font></li>
+<li>若表本身已有序则无需排序</li>
+</ul>
+<h5 id="哈希连接-hash-join"><a class="markdownIt-Anchor" href="#哈希连接-hash-join"></a> 哈希连接 Hash Join</h5>
+<p>假设两个关系 R 和 S 分别具有 N 和 M 个块，较小的关系记为R，较大的关系记为S</p>
+<p>当数据量大到无法全部放入内存时，需要使用外部哈希连接。</p>
+<p>➢分桶：扫描R表，在连接码上用哈希函数h将R中的元组映射到不同的桶（构造）<br>
+扫描S表，用h将S中的元组找到对应的桶，在对应的桶内进行匹配（探查）<br>
+<strong>读取R，用哈希函数h将R分区，将这些分区写回磁盘——2N次I/O</strong><br>
+<strong>读取S，用哈希函数h将S分区，将这些分区写回磁盘——2M次I/O</strong></p>
+<p>➢连接：逐个读取每对分区的块，并在内存中进行哈希连接（直接输出，无需将结果写到磁盘）<br>
+读取N + M次</p>
+<p>I/O数量：</p>
+<ul>
+<li>分桶：2B(R) + 2S(R)</li>
+<li>连接：B(R) + S(R)</li>
+<li>合计：<font color="red">3B(R) + 3S(R) </font></li>
+<li>若表比较小，能一次放入内存，则可以在内存中直接作哈希连接，<font color="red">B(R) + S(R) </font></li>
+</ul>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620162754741.png" alt="image-20240620162754741" style="zoom:50%;">
+<p><strong>嵌套循环连接VS排序合并连接VS哈希连接</strong></p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620163059719.png" alt="image-20240620163059719" style="zoom:50%;">
+<p>范围谓词：只能用<strong>嵌套循环连接</strong></p>
+<p>等值谓词：</p>
+<ul>
+<li>若R或S在连接属性上已有序：<strong>排序合并连接</strong>      <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620163400524.png" alt="image-20240620163400524" style="zoom:40%;"></li>
+<li>大多数情况：<strong>哈希连接</strong></li>
+<li>DBMS需要进行<font color="red">代价估计</font>（依靠统计信息和代价模型）来决定实际物理操作符的选择</li>
+</ul>
+<h2 id="四-查询优化cbo"><a class="markdownIt-Anchor" href="#四-查询优化cbo"></a> 四、查询优化CBO</h2>
+<p>访问计划：为了执行一条SQL查询语句而将一系列访问方法和连接方法缝合在一起。</p>
+<p>访问路径：假设底层RDBMS支持 j 个连接算法，并且每个表平均有 i 个索引，则每个表有(i+1)个访问方法(还有的那一种是顺序访问)，那么n表连接访问路径总数：<font color="red">n! x (i + 1)<sup>n</sup> x j<sup>n-1</sup></font>   	<br>
+n!：连接顺序<br>
+(i + 1)<sup>n</sup>：每个表有(i+1)种访问方法<br>
+j<sup>n-1</sup>：两两连接的方法                       <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620195439654.png" alt="image-20240620195439654" style="zoom:35%;"></p>
+<p>SQL语言的查询优化是一个<font color="red">NP-Hard</font>问题！</p>
+<p>CBO（基于代价的优化）</p>
+ <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620205629678.png" alt="image-20240620205629678" style="zoom:50%;">
+<h4 id="访问计划枚举"><a class="markdownIt-Anchor" href="#访问计划枚举"></a> 访问计划枚举</h4>
+<ul>
+<li>1-复合：<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620201517751.png" alt="image-20240620201517751" style="zoom:50%;"></li>
+<li>2-复合：<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620201605509.png" alt="image-20240620201605509" style="zoom:55%;"></li>
+<li>n-复合：(n-1)复合⊕1-复合   自底向上，动态规划（不一定最好）<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620204034570.png" alt="image-20240620204034570" style="zoom:50%;"></li>
+</ul>
+ <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620204837844.png" alt="image-20240620204837844" style="zoom:50%;">
+<p>连接顺序剪枝：通过排除不可能的或低效的组合以提高优化器效率的方法，例如将过滤后行数少的表作为驱动表（首表）进行连接</p>
+<h4 id="代价估算"><a class="markdownIt-Anchor" href="#代价估算"></a> 代价估算</h4>
+<h5 id="开销模型"><a class="markdownIt-Anchor" href="#开销模型"></a> 开销模型</h5>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>cost</mtext><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><msub><mtext>cost</mtext><mi>i</mi></msub><mo>=</mo><msubsup><mtext>cost</mtext><mi>i</mi><mrow><mi>I</mi><mi mathvariant="normal">/</mi><mi>O</mi></mrow></msubsup><mo>+</mo><msubsup><mtext>cost</mtext><mi>i</mi><mrow><mi>C</mi><mi>P</mi><mi>U</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">\text{cost} = \sum_i \text{cost}_i = \text{cost}_i^{I/O} + \text{cost}_i^{CPU}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord text"><span class="mord">cost</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.327674em;vertical-align:-1.277669em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0500050000000003em;"><span style="top:-1.872331em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.050005em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.277669em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord text"><span class="mord">cost</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.321664em;vertical-align:-0.276864em;"></span><span class="mord"><span class="mord text"><span class="mord">cost</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0448em;"><span style="top:-2.4231360000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.2198em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span><span class="mord mtight">/</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">O</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.276864em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.138331em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord text"><span class="mord">cost</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-2.4530000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span><span class="mord mathnormal mtight" style="margin-right:0.13889em;">P</span><span class="mord mathnormal mtight" style="margin-right:0.10903em;">U</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>是DBMS用于从众多访问路径中选择执行计划的基础，用于计算<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>P</mi><mn>1</mn><mo>∗</mo></msubsup><mo stretchy="false">(</mo><mo stretchy="false">{</mo><mi>t</mi><mo stretchy="false">}</mo><mo stretchy="false">)</mo><mo>=</mo><msup><mi>δ</mi><mo>∗</mo></msup><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><mi>arg</mi><mo>⁡</mo><msub><mo><mi>min</mi><mo>⁡</mo></mo><mrow><mi>s</mi><mo>∈</mo><mi>δ</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow></msub><mtext>cost</mtext><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P_1^* (\{t\}) = \delta^* (t) = \arg \min_{s \in \delta(t)} \text{cost}(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-2.4518920000000004em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24810799999999997em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mopen">{</span><span class="mord mathnormal">t</span><span class="mclose">}</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1052em;vertical-align:-0.3551999999999999em;"></span><span class="mop">ar<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop"><span class="mop">min</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.34480000000000005em;"><span style="top:-2.5198em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mrel mtight">∈</span><span class="mord mathnormal mtight" style="margin-right:0.03785em;">δ</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">t</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3551999999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord text"><span class="mord">cost</span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span></p>
+<p>估算查询执行计划的代价，包括I/O、CPU、内存、网络等资源的消耗，这些开销与数据量密切相关</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>cost</mtext><mo>=</mo><msub><mo>∑</mo><mi>i</mi></msub><msub><mtext>cost</mtext><mi>i</mi></msub><mo>=</mo><msubsup><mtext>cost</mtext><mi>i</mi><mrow><mi>I</mi><mi mathvariant="normal">/</mi><mi>O</mi></mrow></msubsup><mo>+</mo><msubsup><mtext>cost</mtext><mi>i</mi><mrow><mi>C</mi><mi>P</mi><mi>U</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">\text{cost} = \sum_i \text{cost}_i = \text{cost}_i^{I/O} + \text{cost}_i^{CPU}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord text"><span class="mord">cost</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.0497100000000001em;vertical-align:-0.29971000000000003em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.16195399999999993em;"><span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.29971000000000003em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord text"><span class="mord">cost</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.321664em;vertical-align:-0.27686399999999994em;"></span><span class="mord"><span class="mord text"><span class="mord">cost</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0448em;"><span style="top:-2.4231360000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.2198em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span><span class="mord mtight">/</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">O</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.27686399999999994em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.0999949999999998em;vertical-align:-0.253684em;"></span><span class="mord"><span class="mord text"><span class="mord">cost</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8463109999999999em;"><span style="top:-2.4463160000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.0679800000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span><span class="mord mathnormal mtight" style="margin-right:0.13889em;">P</span><span class="mord mathnormal mtight" style="margin-right:0.10903em;">U</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.253684em;"><span></span></span></span></span></span></span></span></span></span></p>
+<p>统一标准量：为了选择唯一的执行计划，需要将右侧归一为标准量，可以采用相对比例或绝对大小参考值。</p>
+<p>需要用到基数估算和选择率估计</p>
+<p>基数估算：使用统计信息估算 选择、连接等查询操作 返回的元组数量<br>
+基数(cardinality)是指查询结果的元组数</p>
+<p>选择率估计：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>p</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi>T</mi><mo stretchy="false">(</mo><msub><mi>σ</mi><mi>p</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><mrow><mi>T</mi><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">S_p(R) = \frac{T(σ_p(R))}{T(R)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.55232em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.03232em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.50732em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span><span class="mopen mtight">(</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.16454285714285716em;"><span style="top:-2.357em;margin-left:-0.03588em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2818857142857143em;"><span></span></span></span></span></span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mclose mtight">)</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></p>
+<h5 id="统计信息"><a class="markdownIt-Anchor" href="#统计信息"></a> 统计信息</h5>
+<p>统计信息是关于<font color="red">数据分布和表结构的元数据</font>，帮助查询优化器估算查询操作的代价。</p>
+<p>DBMS会自动收集所有索引列以及最多k个非索引列的统计信息，在数据字典中存储</p>
+<p>通常包括：</p>
+<ul>
+<li>
+<p>表的统计信息：</p>
+<ul>
+<li>T(R)：总行数，表中记录的总数</li>
+</ul>
+</li>
+<li>
+<p>列的统计信息：</p>
+<ul>
+<li>
+<p>Card(R,A)：列 A 中不同值的数目</p>
+</li>
+<li>
+<p>Null(R,A)：列 A 中NULL 值的数目</p>
+</li>
+<li>
+<p>Hist(R,A)：直方图(histogram)，列 A 值的分布情况。 更细粒度</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>选择率估计：</p>
+<p>均匀分布？属性独立？</p>
+<p>need 总行数、基数、直方图</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">查询</th>
+<th style="text-align:center">情况</th>
+<th style="text-align:center">Card(R,A)</th>
+<th style="text-align:center">S<sub>p</sub>(R)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>SELECT * FROM Student WHERE StuID = '95002';</code></td>
+<td style="text-align:center">唯一值且不同</td>
+<td style="text-align:center">T(R)</td>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>p</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mi>T</mi><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">S_p(R) = \frac{1}{T(R)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.365108em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>SELECT * FROM Student WHERE Ssex = '男';</code></td>
+<td style="text-align:center">均匀分布</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>p</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mtext>Card</mtext><mo stretchy="false">(</mo><mi>R</mi><mo separator="true">,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mfrac><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">S_p(R) = \frac{1}{\text{Card}(R, A)} = \frac{1}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.365108em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">Card</span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">A</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.190108em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>SELECT * FROM Student WHERE Sage &lt; 18;</code></td>
+<td style="text-align:center">非均匀分布</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">不能简单用<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>1</mn><mrow><mtext>Card</mtext><mo stretchy="false">(</mo><mi>R</mi><mo separator="true">,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{\text{Card}(R, A)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.365108em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">Card</span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">A</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>表示，要用直方图Hist(R,A)算范围占比</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>SELECT * FROM Student WHERE Sage &lt; 17 AND Ssex=‘男’</code></td>
+<td style="text-align:center">属性独立</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mrow><mi>p</mi><mn>1</mn></mrow></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>∗</mo><msub><mi>S</mi><mrow><mi>p</mi><mn>2</mn></mrow></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">S_{p1}(R) * S_{p2}(R)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>SELECT * FROM Student WHERE Ssex=‘男’ AND Department=‘CS’;</code></td>
+<td style="text-align:center">属性不独立（列之间有相关性）</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">不能直接相乘</td>
+</tr>
+</tbody>
+</table>
+<p>有了选择率可以计算<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>P</mi><mn>1</mn><mo>∗</mo></msubsup><mo stretchy="false">(</mo><mo stretchy="false">{</mo><mi>t</mi><mo stretchy="false">}</mo><mo stretchy="false">)</mo><mo>=</mo><msup><mi>δ</mi><mo>∗</mo></msup><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><mi>arg</mi><mo>⁡</mo><msub><mo><mi>min</mi><mo>⁡</mo></mo><mrow><mi>s</mi><mo>∈</mo><mi>δ</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow></msub><mtext>cost</mtext><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P_1^* (\{t\}) = \delta^* (t) = \arg \min_{s \in \delta(t)} \text{cost}(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-2.4518920000000004em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24810799999999997em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mopen">{</span><span class="mord mathnormal">t</span><span class="mclose">}</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1052em;vertical-align:-0.3551999999999999em;"></span><span class="mop">ar<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop"><span class="mop">min</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.34480000000000005em;"><span style="top:-2.5198em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mrel mtight">∈</span><span class="mord mathnormal mtight" style="margin-right:0.03785em;">δ</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">t</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3551999999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord text"><span class="mord">cost</span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span></p>
+<p>统计信息的维护：</p>
+<ul>
+<li>定期或较低负载或重大改变更新</li>
+<li>主动收集 ANALYZE命令</li>
+<li>基数估计：蓄水池采样(随机采样)→HyperLogLog(概率算法)</li>
+<li>直方图估计：蓄水池采样(随机采样)→
+<ul>
+<li>等宽直方图：区间宽度相同</li>
+<li>等深直方图：区间深度相同，每个区间数据出现的频率大致相等</li>
+</ul>
+</li>
+</ul>
+<p>统计信息的局限性：只能支持原始表 ，无法支持查询过程中的中间结果，可靠性会级联递减</p>
+<p>RBO-CBO案例分析</p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240620235609731.png" alt="image-20240620235609731" style="zoom:50%;">
+<h2 id="五-执行引擎"><a class="markdownIt-Anchor" href="#五-执行引擎"></a> 五、执行引擎</h2>
+<h5 id="cbo输出"><a class="markdownIt-Anchor" href="#cbo输出"></a> CBO输出</h5>
+<p>最优的物理计划</p>
+<p>执行计划QEP (Query Execution Plan)</p>
+<h5 id="执行模型"><a class="markdownIt-Anchor" href="#执行模型"></a> 执行模型</h5>
+<p>给定QEP， DBMS执行的流程：QEP中每个物理操作符对应一段具体代码实现</p>
+<ul>
+<li>物化模型：每一步物理操作符的中间结果物化（甚至落盘） 后，用于下一步输入
+<ul>
+<li>每个操作符一次性读入所有输入（元组）</li>
+<li>一次性输出所有（元组）</li>
+<li>等每一步的结果完全弄好才能进行下一步<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240621010135831.png" alt="image-20240621010135831" style="zoom:43%;"></li>
+</ul>
+</li>
+<li>火山模型 ：物理操作符的结果元组直接发送给下一个操作符使用（每个操作符需要实现一个Next()方法），中间不需物化
+<ul>
+<li>每个操作符看成是迭代器，父节点-&gt;外层迭代   子节点-&gt;内层迭代</li>
+<li>操作符（迭代层）间传递的是单个元组（投影）</li>
+<li>有一个产生就可以开始迭代处理了（像火山一样往上冒）</li>
+<li>优点是减少了存储开销和I/O操作，提高了执行效率。</li>
+<li><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240621011515676.png" alt="image-20240621011515676"></li>
+</ul>
+</li>
+<li>向量化模型：类似火山模型，但传递的不是单个元组，而是一批元组
+<ul>
+<li>一个向量内含多组内容</li>
+<li>以更好的利用现代CPU的SIMD指令 （单指令多数据流）</li>
+<li><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240621011913713.png" alt="image-20240621011913713"></li>
+</ul>
+</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/06/28/49d65152/image-20240621012248791.png" alt="image-20240621012248791"></p>
+<p><strong>《数据库原理》课程笔记：</strong></p>
+<ol><li><a href="/2024/06/28/9bd3300d.html" title="第一章 数据库系统概述和关系模型">第一章 数据库系统概述和关系模型</a></li><li><a href="/2024/06/28/257e255e.html" title="第七章 事务处理、并发和恢复">第七章 事务处理、并发和恢复</a></li><li><a href="/2024/06/28/885ffcc2.html" title="第二章 关系模式规范化">第二章 关系模式规范化</a></li><li><a href="/2024/06/28/d9c30aa5.html" title="第五章 存储和索引技术">第五章 存储和索引技术</a></li><li><a href="/2024/06/28/49d65152.html" title="第六章 查询处理和优化">第六章 查询处理和优化</a></li></ol></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">大哒王花</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/06/28/49d65152.html">http://example.com/2024/06/28/49d65152.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">rafflesia-k</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></div><div class="post_share"><div class="social-share" data-image="/img/avatar2.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/06/28/d9c30aa5.html" title="第五章 存储和索引技术"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">第五章 存储和索引技术</div></div></a></div><div class="next-post pull-right"><a href="/2024/08/21/4a17b156.html" title="Hello World"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Hello World</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/06/28/9bd3300d.html" title="第一章 数据库系统概述和关系模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第一章 数据库系统概述和关系模型</div></div></a></div><div><a href="/2024/06/28/885ffcc2.html" title="第二章 关系模式规范化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第二章 关系模式规范化</div></div></a></div><div><a href="/2024/06/28/257e255e.html" title="第七章 事务处理、并发和恢复"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第七章 事务处理、并发和恢复</div></div></a></div><div><a href="/2024/06/28/d9c30aa5.html" title="第五章 存储和索引技术"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-28</div><div class="title">第五章 存储和索引技术</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E5%85%AD%E7%AB%A0-%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96"><span class="toc-text"> 第六章 查询处理和优化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80-%E6%9F%A5%E8%AF%A2%E8%A7%A3%E6%9E%90"><span class="toc-text"> 一、查询解析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="toc-text"> 词法分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="toc-text"> 语法分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%AD%E4%B9%89%E5%88%86%E6%9E%90"><span class="toc-text"> 语义分析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C-%E9%80%BB%E8%BE%91%E9%87%8D%E5%86%99"><span class="toc-text"> 二、逻辑重写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89-%E7%89%A9%E7%90%86%E7%AE%97%E5%AD%90"><span class="toc-text"> 三、物理算子</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%CF%83"><span class="toc-text"> 选择σ</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%A8%E8%A1%A8%E6%89%AB%E6%8F%8F-table-scan"><span class="toc-text"> 全表扫描 Table Scan</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E6%89%AB%E6%8F%8F-index-scan"><span class="toc-text"> 索引扫描 Index Scan</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#image-20240619224430882"><span class="toc-text"> </span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%92%E5%BA%8F%CF%84"><span class="toc-text"> 排序τ</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%96%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F"><span class="toc-text"> 外归并排序</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5"><span class="toc-text"> 连接⋈</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B5%8C%E5%A5%97%E5%BE%AA%E7%8E%AF-nested-loop-join"><span class="toc-text"> 嵌套循环 Nested Loop Join</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8E%92%E5%BA%8F%E5%90%88%E5%B9%B6-sort-merge-join"><span class="toc-text"> 排序合并 Sort-Merge Join</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E8%BF%9E%E6%8E%A5-hash-join"><span class="toc-text"> 哈希连接 Hash Join</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B-%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96cbo"><span class="toc-text"> 四、查询优化CBO</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E8%AE%A1%E5%88%92%E6%9E%9A%E4%B8%BE"><span class="toc-text"> 访问计划枚举</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E4%BB%B7%E4%BC%B0%E7%AE%97"><span class="toc-text"> 代价估算</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BC%80%E9%94%80%E6%A8%A1%E5%9E%8B"><span class="toc-text"> 开销模型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF"><span class="toc-text"> 统计信息</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94-%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E"><span class="toc-text"> 五、执行引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#cbo%E8%BE%93%E5%87%BA"><span class="toc-text"> CBO输出</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E6%A8%A1%E5%9E%8B"><span class="toc-text"> 执行模型</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background: transparent"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By 大哒王花</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.8/dist/lazyload.iife.min.js"></script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
